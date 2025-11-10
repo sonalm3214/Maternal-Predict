@@ -64,20 +64,6 @@ if (selected == 'About us'):
     st.write("Thank you for choosing E-Doctor. We are committed to advancing healthcare through technology and predictive analytics. "
             "Feel free to explore our features and take advantage of the insights we provide.")
 
-def validate_and_convert_inputs(inputs):
-    """Validates and converts a list of string inputs to floats."""
-    converted_inputs = []
-    errors = []
-    for i, value in enumerate(inputs):
-        if not value.strip():
-            errors.append(f"Input field {i+1} is empty.")
-            continue
-        try:
-            converted_inputs.append(float(value))
-        except ValueError:
-            errors.append(f"Invalid input: '{value}'. Please enter a numeric value.")
-    return converted_inputs, errors
-
 if (selected == 'Pregnancy Risk Prediction'):
     
     # page title
@@ -108,26 +94,21 @@ if (selected == 'Pregnancy Risk Prediction'):
     # creating a button for Prediction
     with col1:
         if st.button('Predict Pregnancy Risk'):
-            user_inputs = [age, diastolicBP, BS, bodyTemp, heartRate]
-            numeric_inputs, errors = validate_and_convert_inputs(user_inputs)
-
-            if errors:
-                for error in errors:
-                    st.error(error)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                #predicted_risk = maternal_model.predict([[age, diastolicBP, BS, bodyTemp, heartRate]])
+                input_data = np.array([[age, diastolicBP, BS, bodyTemp, heartRate]])
+        
+                input_scaled = scale_X.transform(input_data)
+                predicted_risk = maternal_model.predict(input_scaled)
+            # st
+            st.subheader("Risk Level:")
+            if predicted_risk[0] == 0:
+                st.markdown('<bold><p style="font-weight: bold; font-size: 20px; color: green;">Low Risk</p></bold>', unsafe_allow_html=True)
+            elif predicted_risk[0] == 1:
+                st.markdown('<bold><p style="font-weight: bold; font-size: 20px; color: orange;">Medium Risk</p></Bold>', unsafe_allow_html=True)
             else:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    input_data = np.array([numeric_inputs])
-                    input_scaled = scale_X.transform(input_data)
-                    predicted_risk = maternal_model.predict(input_scaled)
-                
-                st.subheader("Risk Level:")
-                if predicted_risk[0] == 0:
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: green;">Low Risk</p>', unsafe_allow_html=True)
-                elif predicted_risk[0] == 1:
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: orange;">Medium Risk</p>', unsafe_allow_html=True)
-                else:
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: red;">High Risk</p>', unsafe_allow_html=True)
+                st.markdown('<bold><p style="font-weight: bold; font-size: 20px; color: red;">High Risk</p><bold>', unsafe_allow_html=True)
     with col2:
         if st.button("Clear"): 
             st.rerun()
@@ -209,32 +190,25 @@ if (selected == 'Fetal Health Prediction'):
     st.markdown('</br>', unsafe_allow_html=True)
     with col1:
         if st.button('Predict Pregnancy Risk'):
-            user_inputs = [
-                BaselineValue, Accelerations, fetal_movement, uterine_contractions, 
-                light_decelerations, severe_decelerations, prolongued_decelerations, 
-                abnormal_short_term_variability, mean_value_of_short_term_variability,
-                percentage_of_time_with_abnormal_long_term_variability,
-                mean_value_of_long_term_variability, histogram_width, histogram_min, 
-                histogram_max, histogram_number_of_peaks, histogram_number_of_zeroes, 
-                histogram_mode, histogram_mean, histogram_median, histogram_variance, 
-                histogram_tendency
-            ]
-            numeric_inputs, errors = validate_and_convert_inputs(user_inputs)
-
-            if errors:
-                for error in errors:
-                    st.error(error)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                predicted_risk = fetal_model.predict([[BaselineValue, Accelerations, fetal_movement,
+       uterine_contractions, light_decelerations, severe_decelerations,
+       prolongued_decelerations, abnormal_short_term_variability,
+       mean_value_of_short_term_variability,
+       percentage_of_time_with_abnormal_long_term_variability,
+       mean_value_of_long_term_variability, histogram_width,
+       histogram_min, histogram_max, histogram_number_of_peaks,
+       histogram_number_of_zeroes, histogram_mode, histogram_mean,
+       histogram_median, histogram_variance, histogram_tendency]])
+            # st.subheader("Risk Level:")
+            st.markdown('</br>', unsafe_allow_html=True)
+            if predicted_risk[0] == 0:
+                st.markdown('<bold><p style="font-weight: bold; font-size: 20px; color: green;">Result  Comes to be  Normal</p></bold>', unsafe_allow_html=True)
+            elif predicted_risk[0] == 1:
+                st.markdown('<bold><p style="font-weight: bold; font-size: 20px; color: orange;">Result  Comes to be  Suspect</p></Bold>', unsafe_allow_html=True)
             else:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    predicted_risk = fetal_model.predict([numeric_inputs])
-                st.markdown('</br>', unsafe_allow_html=True)
-                if predicted_risk[0] == 1: # Assuming 1 is Normal based on your original code's color scheme
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: green;">Result: Normal</p>', unsafe_allow_html=True)
-                elif predicted_risk[0] == 2: # Assuming 2 is Suspect
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: orange;">Result: Suspect</p>', unsafe_allow_html=True)
-                else: # Assuming 3 is Pathological
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: red;">Result: Pathological</p>', unsafe_allow_html=True)
+                st.markdown('<bold><p style="font-weight: bold; font-size: 20px; color: red;">Result  Comes to be  Pathological</p><bold>', unsafe_allow_html=True)
     with col2:
         if st.button("Clear"): 
             st.rerun()
