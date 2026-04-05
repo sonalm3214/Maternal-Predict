@@ -1,4 +1,4 @@
-# 🩺 EndMomMort — Advanced Maternal & Fetal Health Prediction Platform
+# 🩺 MaternalPredict — Advanced Maternal & Fetal Health Prediction Platform
 
 ## 🌸 Introduction
 
